@@ -1,0 +1,13 @@
+---
+
+Style/FormatStringToken:
+  Enabled: false
+
+Metrics/ClassLength:
+  Enabled: false
+
+Metrics/MethodLength:
+  Max: 13
+
+Style/ClassVars:
+  Enabled: false
