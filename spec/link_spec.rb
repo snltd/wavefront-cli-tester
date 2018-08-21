@@ -3,14 +3,17 @@
 require 'json'
 require_relative '../spec_helper'
 
-PREFIX  = test_object_prefix.freeze
-COMMAND = 'link'.freeze
+LINK_PREFIX = test_object_prefix.freeze
 
 class LinkTests < CommandTest
   def setup
-    @props = { name:        "#{PREFIX} link name",
-               description: "#{PREFIX} link description",
-               template:    "https://#{PREFIX}.wftest.tld/{{source}}" }
+    @props = { name:        "#{LINK_PREFIX} link name",
+               description: "#{LINK_PREFIX} link description",
+               template:    "https://#{LINK_PREFIX}.wftest.tld/{{source}}" }
+  end
+
+  def command
+    'link'
   end
 
   def test_01_import

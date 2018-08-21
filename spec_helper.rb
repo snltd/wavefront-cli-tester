@@ -8,6 +8,8 @@ WF      = Pathname.new(ENV['HOME']) + 'work' + 'wavefront-cli' + 'bin' + 'wf'
 C_OPTS  = ''.freeze # use default credentials
 IMPORTS = ROOT + 'spec' + 'resources' + 'imports'
 
+UUID_REGEX = '[\da-f]{8}(-[\da-f]{4}){3}-[\da-f]{12}'.freeze
+
 def test_object_prefix
   SecureRandom.hex[0..9]
 end
@@ -24,12 +26,17 @@ class CommandTest < MiniTest::Test
     :alpha
   end
 
-  def run_cmd(cmd)
-    cmd = format('%s %s %s %s', WF, COMMAND, C_OPTS, cmd).squeeze(' ')
+  def run_cmd(cmd, return_both = false)
+    cmd = format('%s %s %s %s', WF, command, C_OPTS, cmd).squeeze(' ')
     puts "running #{cmd.gsub(/#{WF}/, 'wf')}"
     out, err = capture_subprocess_io { system(cmd) }
-    assert_empty(err)
-    out
+
+    if return_both
+      [out, err]
+    else
+      assert_empty(err)
+      out
+    end
   end
 
   # Wrapper to #run_cmd which returns out as a parsed object
@@ -48,11 +55,19 @@ class CommandTest < MiniTest::Test
   end
 
   def import_file
-    IMPORTS + format('%s.json', COMMAND)
+    IMPORTS + format('%s.json', command)
   end
 
   def delete_test_object(id)
     run_cmd format('delete %s', id)
+  end
+
+  def undelete_test_object(id)
+    run_cmd format('undelete %s', id)
+  end
+
+  def undelete_undeleted_test_object(id)
+    run_cmd(format('undelete %s', id), true)
   end
 
   def list_all_objects_json
@@ -80,6 +95,10 @@ class CommandTest < MiniTest::Test
     run_cmd format('update %s %s', param, id)
   end
 
+  def rename_test_object(newname, id)
+    run_cmd format('rename %s %s', id, newname)
+  end
+
   # Extract the ID from the output you get when creating an object
   #
   def extract_id(out)
@@ -89,6 +108,13 @@ class CommandTest < MiniTest::Test
     end
 
     abort 'could not find ID'
+  end
+
+  # Extract the ID from a search. Takes the first match if there are
+  # many.
+  #
+  def extract_id_search(out)
+    out.split("\n")[0].split[0]
   end
 
   # Return the orignal hash, minus the ID key
