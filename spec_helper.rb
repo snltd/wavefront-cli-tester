@@ -46,7 +46,14 @@ class CommandTest < MiniTest::Test
   end
 
   def create_test_object(*args)
-    args.map! { |a| a =~ /[\s\[\{\]\}]/ ? format('"%s"', a) : a }
+    args.map! do |a|
+      if !a.start_with?('-') && a =~ /[\s\[\{\]\}]/
+        format('"%s"', a)
+      else
+        a
+      end
+    end
+
     run_cmd format('create %s', args.join(' '))
   end
 
